@@ -1,0 +1,2 @@
+2026-10-01T12:10:01Z service=weblogic severity=ERROR message="deployment failed for billing-app.war"
+2026-10-01T12:10:05Z service=weblogic severity=ERROR message="rollback initiated after failed deployment"

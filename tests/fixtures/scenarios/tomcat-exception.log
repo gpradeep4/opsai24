@@ -1,0 +1,2 @@
+2026-10-01T13:08:45Z service=tomcat severity=ERROR message="Unhandled NullPointerException in checkout flow"
+2026-10-01T13:08:46Z service=tomcat severity=ERROR message="exception propagated to servlet filter"
