@@ -9,29 +9,33 @@ from opsai24.investigation.exceptions import InvalidStateTransitionError
 
 
 class InvestigationState(StrEnum):
-    CREATED = "CREATED"
+    QUEUED = "QUEUED"
     RUNNING = "RUNNING"
-    SUCCEEDED = "SUCCEEDED"
+    COMPLETED = "COMPLETED"
+    PARTIAL = "PARTIAL"
     FAILED = "FAILED"
-    CANCELED = "CANCELED"
+    CANCELLED = "CANCELLED"
 
 
 TERMINAL_STATES = {
-    InvestigationState.SUCCEEDED,
+    InvestigationState.COMPLETED,
+    InvestigationState.PARTIAL,
     InvestigationState.FAILED,
-    InvestigationState.CANCELED,
+    InvestigationState.CANCELLED,
 }
 
 ALLOWED_TRANSITIONS: dict[InvestigationState, set[InvestigationState]] = {
-    InvestigationState.CREATED: {InvestigationState.RUNNING, InvestigationState.CANCELED},
+    InvestigationState.QUEUED: {InvestigationState.RUNNING, InvestigationState.CANCELLED},
     InvestigationState.RUNNING: {
-        InvestigationState.SUCCEEDED,
+        InvestigationState.COMPLETED,
+        InvestigationState.PARTIAL,
         InvestigationState.FAILED,
-        InvestigationState.CANCELED,
+        InvestigationState.CANCELLED,
     },
-    InvestigationState.SUCCEEDED: set(),
+    InvestigationState.COMPLETED: set(),
+    InvestigationState.PARTIAL: set(),
     InvestigationState.FAILED: set(),
-    InvestigationState.CANCELED: set(),
+    InvestigationState.CANCELLED: set(),
 }
 
 
@@ -67,7 +71,7 @@ class Investigation:
     source_event_id: str
     product: str
     version: str
-    state: InvestigationState = InvestigationState.CREATED
+    state: InvestigationState = InvestigationState.QUEUED
     progress_percent: int = 0
     status_message: str = ""
     evidence_ids: tuple[str, ...] = field(default_factory=tuple)

@@ -40,7 +40,7 @@ class InvestigationServiceTests(unittest.TestCase):
             evidence_ids=["ev-1", "ev-1", " ev-2 "],
             metadata={"region": "us-west", "api_token": "secret-value"},
         )
-        self.assertEqual(investigation.state, InvestigationState.CREATED)
+        self.assertEqual(investigation.state, InvestigationState.QUEUED)
         self.assertEqual(investigation.source_event_id, "evt-123")
         self.assertEqual(investigation.evidence_ids, ("ev-1", "ev-2"))
         self.assertNotIn("api_token", investigation.metadata)
@@ -60,13 +60,46 @@ class InvestigationServiceTests(unittest.TestCase):
         self.assertEqual(running.state, InvestigationState.RUNNING)
         self.assertEqual(running.revision, 1)
 
-        succeeded = self.service.transition_state(
+        completed = self.service.transition_state(
             investigation_id=running.investigation_id,
-            next_state=InvestigationState.SUCCEEDED,
+            next_state=InvestigationState.COMPLETED,
             expected_revision=1,
         )
-        self.assertEqual(succeeded.state, InvestigationState.SUCCEEDED)
-        self.assertEqual(succeeded.progress_percent, 100)
+        self.assertEqual(completed.state, InvestigationState.COMPLETED)
+        self.assertEqual(completed.progress_percent, 100)
+
+    def test_running_to_partial_is_valid(self) -> None:
+        queued = self.service.create_investigation(
+            source_event_id="evt-partial",
+            product="postgresql",
+            version="16",
+        )
+        running = self.service.transition_state(
+            investigation_id=queued.investigation_id,
+            next_state=InvestigationState.RUNNING,
+            expected_revision=0,
+        )
+        partial = self.service.transition_state(
+            investigation_id=running.investigation_id,
+            next_state=InvestigationState.PARTIAL,
+            expected_revision=1,
+        )
+        self.assertEqual(partial.state, InvestigationState.PARTIAL)
+        self.assertEqual(partial.progress_percent, 100)
+
+    def test_queued_to_cancelled_is_valid(self) -> None:
+        queued = self.service.create_investigation(
+            source_event_id="evt-cancelled",
+            product="kubernetes",
+            version="1.29",
+        )
+        cancelled = self.service.transition_state(
+            investigation_id=queued.investigation_id,
+            next_state=InvestigationState.CANCELLED,
+            expected_revision=0,
+        )
+        self.assertEqual(cancelled.state, InvestigationState.CANCELLED)
+        self.assertEqual(cancelled.progress_percent, 100)
 
     def test_invalid_transition_and_no_regression_to_running(self) -> None:
         created = self.service.create_investigation(
@@ -77,7 +110,7 @@ class InvestigationServiceTests(unittest.TestCase):
         with self.assertRaises(InvalidStateTransitionError):
             self.service.transition_state(
                 investigation_id=created.investigation_id,
-                next_state=InvestigationState.SUCCEEDED,
+                next_state=InvestigationState.COMPLETED,
                 expected_revision=0,
             )
 
@@ -128,7 +161,7 @@ class InvestigationServiceTests(unittest.TestCase):
         with self.assertRaises(ConcurrencyConflictError):
             self.service.transition_state(
                 investigation_id=created.investigation_id,
-                next_state=InvestigationState.SUCCEEDED,
+                next_state=InvestigationState.COMPLETED,
                 expected_revision=0,
             )
 

@@ -38,7 +38,7 @@ The investigation lifecycle implementation lives under `opsai24/investigation/`:
 
 - `models.py`
   - `Investigation` record model
-  - lifecycle states: `CREATED`, `RUNNING`, `SUCCEEDED`, `FAILED`, `CANCELED`
+  - lifecycle states: `QUEUED`, `RUNNING`, `COMPLETED`, `PARTIAL`, `FAILED`, `CANCELLED`
   - transition validation rules, including guard against returning to `RUNNING`
     from any terminal state
 - `service.py`

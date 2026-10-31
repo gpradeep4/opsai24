@@ -106,7 +106,7 @@ class InvestigationService:
             source_event_id=event_id,
             product=product.strip().lower(),
             version=version.strip(),
-            state=InvestigationState.CREATED,
+            state=InvestigationState.QUEUED,
             progress_percent=0,
             evidence_ids=_normalize_evidence_ids(evidence_ids),
             metadata=_sanitize_metadata(metadata),
