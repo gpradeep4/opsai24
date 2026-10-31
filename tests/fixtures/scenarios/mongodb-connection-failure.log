@@ -1,0 +1,2 @@
+2026-10-01T14:10:11Z service=mongodb severity=ERROR message="mongodb connection failure: no primary available"
+2026-10-01T14:10:12Z service=mongodb severity=WARNING message="driver retry loop active"

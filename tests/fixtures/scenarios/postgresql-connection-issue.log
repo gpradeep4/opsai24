@@ -1,0 +1,2 @@
+2026-10-01T15:10:45Z service=payments-api severity=ERROR message="postgresql query timeout after 30s"
+2026-10-01T15:10:47Z service=postgresql severity=WARNING message="connection saturation near max clients"

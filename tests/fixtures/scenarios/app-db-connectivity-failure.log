@@ -1,0 +1,2 @@
+2026-10-01T16:15:03Z service=payments-api severity=ERROR message="connection refused while contacting database endpoint"
+2026-10-01T16:15:05Z service=payments-api severity=ERROR message="database endpoint unreachable from application subnet"

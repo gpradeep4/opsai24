@@ -8,6 +8,9 @@ OpsAI24 Feature 2 introduces an investigation lifecycle domain and service with
 framework-independent state management, idempotent incident intake, and local
 persistence abstraction.
 
+OpsAI24 Feature 3 introduces reusable incident scenarios and a deterministic
+scenario runner that reuses Feature 1 and Feature 2 contracts.
+
 ## Architecture
 
 The implementation lives under `opsai24/technology/`:
@@ -100,6 +103,54 @@ result = registry.investigate(
 print(result.summary)
 print(result.findings)
 ```
+
+## Scenario Framework (Feature 3)
+
+The scenario implementation lives under `opsai24/scenarios/`:
+
+- `models.py`
+  - reusable `ScenarioDefinition` contract with:
+    - incident details
+    - affected CI
+    - technology
+    - product version
+    - event time window
+    - fixture references
+    - expected findings
+  - machine-readable run summary (`ScenarioRunSummary.to_dict()`) with
+    passed/failed/incomplete scenario counts
+- `adapters.py`
+  - fixture evidence adapter abstraction
+  - local file-based adapter for deterministic tests
+- `catalog.py`
+  - initial scenario set:
+    - Linux disk space warning
+    - Linux CPU warning
+    - WebLogic deployment failure
+    - Tomcat application exception
+    - MongoDB connection failure
+    - PostgreSQL connection issue
+    - Application-to-database connectivity failure
+- `runner.py`
+  - creates investigations via `InvestigationService`
+  - transitions lifecycle (`QUEUED -> RUNNING -> COMPLETED/PARTIAL/FAILED`)
+  - validates:
+    - incident/component mapping
+    - expected evidence identification
+    - timestamp window handling
+    - unsupported technology/version handling
+    - missing evidence
+    - unsupported AI conclusions
+
+Synthetic fixtures are stored under `tests/fixtures/scenarios/` to keep test
+data separate from production code.
+
+### Adding a new scenario
+
+1. Add a synthetic fixture file under `tests/fixtures/scenarios/`.
+2. Add a new `ScenarioDefinition` entry in `opsai24/scenarios/catalog.py`.
+3. Include expected finding tokens and component mapping in the definition.
+4. Add/adjust tests in `tests/test_scenario_runner.py` for the new case.
 
 ## Tests
 

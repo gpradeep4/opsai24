@@ -1,0 +1,2 @@
+2026-10-01T10:05:12Z host=ci-linux-worker-01 severity=WARNING message="disk utilization reached 95% on /var"
+2026-10-01T10:06:12Z host=ci-linux-worker-01 severity=INFO message="inode usage nominal"
